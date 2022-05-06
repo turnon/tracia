@@ -29,12 +29,18 @@ class Tracia
   end
 
   class Frame
-    attr_reader :children
+    attr_reader :name, :children
 
-    def initialize
-      @name = nil
+    def initialize(name, level)
+      @name = name
+      @level = level
       @children = []
       @data = []
+    end
+
+    def inspect
+      spaces = ' ' * @level
+      @children.empty? ? "#{@name}\n" : "#{@name} ->\n#{spaces}#{@children}"
     end
   end
 
@@ -48,6 +54,22 @@ class Tracia
   end
 
   def log
-    puts @stacks
+    frames = []
+    @stacks.each do |stack, data|
+      stack.reverse.each_with_index do |raw_frame, idx|
+        frame = frames[idx]
+        if frame == nil
+          frame = Frame.new(raw_frame, idx)
+          frames[idx - 1].children << frame if idx > 0
+          frames[idx] = frame
+        elsif frame.name != raw_frame
+          frame = Frame.new(raw_frame, idx)
+          frames[idx - 1].children << frame if idx > 0
+          frames[idx] = frame
+          frames = frames.slice(0, idx + 1)
+        end
+      end
+    end
+    p frames
   end
 end
