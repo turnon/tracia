@@ -2,7 +2,7 @@
 
 require_relative "tracia/version"
 
-module Tracia
+class Tracia
   class Error < StandardError; end
 
   attr_accessor :level, :error
