@@ -15,6 +15,8 @@ class TestTracia < Minitest::Test
     def b
       c1
       c2
+      c3
+      c4
     end
 
     def c1
@@ -35,6 +37,28 @@ class TestTracia < Minitest::Test
 
     def f
       Tracia.add('i am in f')
+    end
+
+    def c3(n = 5)
+      if n <= 0
+        Tracia.add('i am in c3')
+        return
+      end
+      c3(n - 1)
+    end
+
+    def c4
+      3.times do
+        g
+      end
+    end
+
+    def g
+      h
+    end
+
+    def h
+       Tracia.add('i am in h')
     end
   end
 

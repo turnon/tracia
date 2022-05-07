@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 require_relative "tracia/version"
+require "tree_graph"
 
 class Tracia
   class Error < StandardError; end
 
   attr_accessor :level, :error
 
-  # Your code goes here...
   class << self
     def start
       trc = (Thread.current[:_tracia_] ||= new)
@@ -29,6 +29,8 @@ class Tracia
   end
 
   class Frame
+    include TreeGraph
+
     attr_reader :name, :children
 
     def initialize(name, level)
@@ -38,9 +40,12 @@ class Tracia
       @data = []
     end
 
-    def inspect
-      spaces = ' ' * @level
-      @children.empty? ? "#{@name}\n" : "#{@name} ->\n#{spaces}#{@children}"
+    def label_for_tree_graph
+      name
+    end
+
+    def children_for_tree_graph
+      children
     end
   end
 
@@ -54,22 +59,26 @@ class Tracia
   end
 
   def log
-    frames = []
+    @frames = []
     @stacks.each do |stack, data|
       stack.reverse.each_with_index do |raw_frame, idx|
-        frame = frames[idx]
+        frame = @frames[idx]
         if frame == nil
-          frame = Frame.new(raw_frame, idx)
-          frames[idx - 1].children << frame if idx > 0
-          frames[idx] = frame
+          push_frame(raw_frame, idx)
         elsif frame.name != raw_frame
-          frame = Frame.new(raw_frame, idx)
-          frames[idx - 1].children << frame if idx > 0
-          frames[idx] = frame
-          frames = frames.slice(0, idx + 1)
+          push_frame(raw_frame, idx)
+          @frames = @frames.slice(0, idx + 1)
         end
       end
     end
-    p frames
+    puts @frames[0].tree_graph
+  end
+
+  private
+
+  def push_frame(raw_frame, idx)
+    frame = Frame.new(raw_frame, idx)
+    @frames[idx - 1].children << frame if idx > 0
+    @frames[idx] = frame
   end
 end
