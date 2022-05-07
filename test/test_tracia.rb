@@ -8,78 +8,76 @@ class TestTracia < Minitest::Test
   end
 
   class SomeTest
-    def a
-      b
+    def run
+      usual_call
+      trace_in_different_levels
+      recursive_call
+      loop_call
+      call_dynamic_methods
     end
 
-    def b
-      c1
-      c2
-      c3
-      c4
-      c5
+    def usual_call
+      usual_call_deep
     end
 
-    def c1
-      d
+    def usual_call_deep
+      Tracia.add('usual_call')
     end
 
-    def d
-      Tracia.add('i am in d')
+    def trace_in_different_levels
+      trace_in_different_levels_lv1
     end
 
-    def c2
-      e
+    def trace_in_different_levels_lv1
+      Tracia.add('trace_in_different_levels_lv1 - 1')
+      trace_in_different_levels_lv2
+      Tracia.add('trace_in_different_levels_lv1 - 2')
     end
 
-    def e
-      f
+    def trace_in_different_levels_lv2
+      Tracia.add('trace_in_different_levels_lv2')
     end
 
-    def f
-      Tracia.add('i am in f')
-    end
-
-    def c3(n = 5)
+    def recursive_call(n = 5)
+      Tracia.add("recursive_call #{n}")
       if n <= 0
-        Tracia.add('i am in c3')
         return
       end
-      c3(n - 1)
+      recursive_call(n - 1)
     end
 
-    def c4
+    def loop_call
       3.times do
-        g
+        loop_call_lv1
       end
     end
 
-    def g
-      h
+    def loop_call_lv1
+      loop_call_lv2
     end
 
-    def h
-      Tracia.add('i am in h')
+    def loop_call_lv2
+      Tracia.add('loop_call')
     end
 
-    def c5
-      k1
+    def call_dynamic_methods
+      call_dynamic_method_1
     end
 
     (1..5).each do |n|
-      define_method("k#{n}") do
-        send("k#{n + 1}")
+      define_method("call_dynamic_method_#{n}") do
+        send("call_dynamic_method_#{n + 1}")
       end
     end
 
-    def k6
-      Tracia.add('i am in k6')
+    def call_dynamic_method_6
+      Tracia.add('call_dynamic_methods')
     end
   end
 
   def test_add
     Tracia.start do
-      SomeTest.new.a
+      SomeTest.new.run
     end
   end
 
