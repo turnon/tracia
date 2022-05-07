@@ -33,9 +33,8 @@ class Tracia
 
     attr_reader :name, :children
 
-    def initialize(name, level)
+    def initialize(name)
       @name = name
-      @level = level
       @children = []
       @data = []
     end
@@ -77,7 +76,7 @@ class Tracia
   private
 
   def push_frame(raw_frame, idx)
-    frame = Frame.new(raw_frame, idx)
+    frame = Frame.new(raw_frame)
     @frames[idx - 1].children << frame if idx > 0
     @frames[idx] = frame
   end
