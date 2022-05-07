@@ -14,6 +14,7 @@ class TestTracia < Minitest::Test
       recursive_call
       loop_call
       call_dynamic_methods
+      call_undefined_method
       self.class.call_singleton_lv1
     end
 
@@ -73,6 +74,14 @@ class TestTracia < Minitest::Test
 
     def call_dynamic_method_6
       Tracia.add('call_dynamic_methods')
+    end
+
+    def method_missing(method_name, *args, &block)
+      method_not_found(method_name, *args)
+    end
+
+    def method_not_found(method_name, *args)
+      Tracia.add("method_not_found #{method_name}(*#{args})")
     end
 
     class << self
