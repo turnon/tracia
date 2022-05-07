@@ -17,6 +17,7 @@ class TestTracia < Minitest::Test
       c2
       c3
       c4
+      c5
     end
 
     def c1
@@ -58,7 +59,21 @@ class TestTracia < Minitest::Test
     end
 
     def h
-       Tracia.add('i am in h')
+      Tracia.add('i am in h')
+    end
+
+    def c5
+      k1
+    end
+
+    (1..5).each do |n|
+      define_method("k#{n}") do
+        send("k#{n + 1}")
+      end
+    end
+
+    def k6
+      Tracia.add('i am in k6')
     end
   end
 
