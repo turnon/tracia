@@ -14,6 +14,7 @@ class TestTracia < Minitest::Test
       recursive_call
       loop_call
       call_dynamic_methods
+      self.class.call_singleton_lv1
     end
 
     def usual_call
@@ -72,6 +73,16 @@ class TestTracia < Minitest::Test
 
     def call_dynamic_method_6
       Tracia.add('call_dynamic_methods')
+    end
+
+    class << self
+      def call_singleton_lv1
+        call_singleton_lv2
+      end
+
+      def call_singleton_lv2
+        Tracia.add('call_singleton')
+      end
     end
   end
 
