@@ -22,9 +22,9 @@ class Tracia
       trc.log if trc.level == 0 && trc.error.nil?
     end
 
-    def add(attrs)
+    def add(info)
       trc = Thread.current[:_tracia_]
-      trc.add(caller, attrs) if trc
+      trc.add(caller, info) if trc
     end
   end
 
@@ -48,18 +48,36 @@ class Tracia
     end
   end
 
+  class Info
+    include TreeGraph
+
+    NO_CHILD = []
+
+    def initialize(info)
+      @info = info
+    end
+
+    def label_for_tree_graph
+      @info
+    end
+
+    def children_for_tree_graph
+      NO_CHILD
+    end
+  end
+
   def initialize
     @stacks = []
     @level = 0
   end
 
-  def add(stack, data)
-    @stacks << [stack, data]
+  def add(stack, info)
+    @stacks << [stack, info]
   end
 
   def log
     @frames = []
-    @stacks.each do |stack, data|
+    @stacks.each do |stack, info|
       stack.reverse.each_with_index do |raw_frame, idx|
         frame = @frames[idx]
         if frame == nil
@@ -69,6 +87,7 @@ class Tracia
           @frames = @frames.slice(0, idx + 1)
         end
       end
+      @frames.last.children << Info.new(info)
     end
     puts @frames[0].tree_graph
   end
