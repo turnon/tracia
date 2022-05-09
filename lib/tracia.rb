@@ -81,7 +81,8 @@ class Tracia
     @frames = []
     @stacks << [error.backtrace, error.message] if error
     @stacks.each do |stack, info|
-      stack.reverse.each_with_index do |raw_frame, idx|
+      stack.reject!{ |raw_frame| reject?(raw_frame) }.reverse!
+      stack.each_with_index do |raw_frame, idx|
         raw_frame = GemPaths.shorten(raw_frame)
         frame = @frames[idx]
         if frame == nil
@@ -102,5 +103,10 @@ class Tracia
     frame = Frame.new(raw_frame)
     @frames[idx - 1].children << frame if idx > 0
     @frames[idx] = frame
+  end
+
+  def reject?(raw_frame)
+    @opt_reject ||= Array(@opt[:reject])
+    @opt_reject.any?{ |rj| rj =~ raw_frame }
   end
 end
