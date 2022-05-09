@@ -8,6 +8,8 @@ class TestTracia < Minitest::Test
   end
 
   class SomeTest
+    class ErrTest < StandardError; end
+
     def run
       usual_call
       trace_in_different_levels
@@ -16,6 +18,7 @@ class TestTracia < Minitest::Test
       call_dynamic_methods
       call_undefined_method
       self.class.call_singleton_lv1
+      raise_error
     end
 
     def usual_call
@@ -84,6 +87,18 @@ class TestTracia < Minitest::Test
       Tracia.add("method_not_found #{method_name}(*#{args})")
     end
 
+    def raise_error
+      raise_error_lv1
+    end
+
+    def raise_error_lv1
+      raise_error_lv2
+    end
+
+    def raise_error_lv2
+      raise ErrTest, 'something wrong !'
+    end
+
     class << self
       def call_singleton_lv1
         call_singleton_lv2
@@ -99,6 +114,7 @@ class TestTracia < Minitest::Test
     Tracia.start do
       SomeTest.new.run
     end
+  rescue SomeTest::ErrTest
   end
 
 end
