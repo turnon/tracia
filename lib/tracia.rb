@@ -10,8 +10,8 @@ class Tracia
   attr_accessor :level, :error
 
   class << self
-    def start
-      trc = (Thread.current[:_tracia_] ||= new)
+    def start(**opt)
+      trc = (Thread.current[:_tracia_] ||= new(**opt))
       trc.level += 1
       yield
     rescue StandardError => e
@@ -67,7 +67,8 @@ class Tracia
     end
   end
 
-  def initialize
+  def initialize(**opt)
+    @opt = opt
     @stacks = []
     @level = 0
   end
@@ -92,7 +93,7 @@ class Tracia
       end
       @frames.last.children << Info.new(info)
     end
-    puts @frames[0].tree_graph
+    @opt[:out].puts @frames[0].tree_graph
   end
 
   private
