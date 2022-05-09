@@ -2,6 +2,7 @@
 
 require_relative "tracia/version"
 require "tree_graph"
+require "tracia/gem_paths"
 
 class Tracia
   class Error < StandardError; end
@@ -80,6 +81,7 @@ class Tracia
     @stacks << [error.backtrace, error.message] if error
     @stacks.each do |stack, info|
       stack.reverse.each_with_index do |raw_frame, idx|
+        raw_frame = GemPaths.shorten(raw_frame)
         frame = @frames[idx]
         if frame == nil
           push_frame(raw_frame, idx)
