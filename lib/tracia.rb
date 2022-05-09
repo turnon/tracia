@@ -69,6 +69,8 @@ class Tracia
 
   def initialize(**opt)
     @opt = opt
+    @opt_reject = Array(@opt[:reject])
+
     @stacks = []
     @level = 0
   end
@@ -106,7 +108,6 @@ class Tracia
   end
 
   def reject?(raw_frame)
-    @opt_reject ||= Array(@opt[:reject])
     @opt_reject.any?{ |rj| rj =~ raw_frame }
   end
 end
