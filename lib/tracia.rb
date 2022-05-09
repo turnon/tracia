@@ -2,6 +2,7 @@
 
 require_relative "tracia/version"
 require "tree_graph"
+require "tracia/gem_paths"
 
 class Tracia
   class Error < StandardError; end
@@ -9,8 +10,8 @@ class Tracia
   attr_accessor :level, :error
 
   class << self
-    def start
-      trc = (Thread.current[:_tracia_] ||= new)
+    def start(**opt)
+      trc = (Thread.current[:_tracia_] ||= new(**opt))
       trc.level += 1
       yield
     rescue StandardError => e
@@ -66,7 +67,8 @@ class Tracia
     end
   end
 
-  def initialize
+  def initialize(**opt)
+    @opt = opt
     @stacks = []
     @level = 0
   end
@@ -79,7 +81,9 @@ class Tracia
     @frames = []
     @stacks << [error.backtrace, error.message] if error
     @stacks.each do |stack, info|
-      stack.reverse.each_with_index do |raw_frame, idx|
+      stack.reject!{ |raw_frame| reject?(raw_frame) }.reverse!
+      stack.each_with_index do |raw_frame, idx|
+        raw_frame = GemPaths.shorten(raw_frame)
         frame = @frames[idx]
         if frame == nil
           push_frame(raw_frame, idx)
@@ -90,7 +94,7 @@ class Tracia
       end
       @frames.last.children << Info.new(info)
     end
-    puts @frames[0].tree_graph
+    @opt[:out].puts @frames[0].tree_graph
   end
 
   private
@@ -99,5 +103,10 @@ class Tracia
     frame = Frame.new(raw_frame)
     @frames[idx - 1].children << frame if idx > 0
     @frames[idx] = frame
+  end
+
+  def reject?(raw_frame)
+    @opt_reject ||= Array(@opt[:reject])
+    @opt_reject.any?{ |rj| rj =~ raw_frame }
   end
 end
