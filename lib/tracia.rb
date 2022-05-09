@@ -19,7 +19,7 @@ class Tracia
     ensure
       trc.level -= 1
       Thread.current[:_tracia_] = nil if trc.error || trc.level == 0
-      trc.log if trc.level == 0 && trc.error.nil?
+      trc.log if trc.level == 0
     end
 
     def add(info)
@@ -77,6 +77,7 @@ class Tracia
 
   def log
     @frames = []
+    @stacks << [error.backtrace, error.message] if error
     @stacks.each do |stack, info|
       stack.reverse.each_with_index do |raw_frame, idx|
         frame = @frames[idx]
