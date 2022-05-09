@@ -111,7 +111,7 @@ class TestTracia < Minitest::Test
   end
 
   def test_add
-    Tracia.start do
+    Tracia.start(out: STDOUT) do
       SomeTest.new.run
     end
   rescue SomeTest::ErrTest

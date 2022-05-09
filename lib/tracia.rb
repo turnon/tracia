@@ -71,40 +71,41 @@ class Tracia
     @opt = opt
     @opt_reject = Array(@opt[:reject])
 
-    @stacks = []
+    @backtraces = []
     @level = 0
   end
 
-  def add(stack, info)
-    @stacks << [stack, info]
+  def add(backtrace, info)
+    @backtraces << [backtrace, info]
   end
 
   def log
-    @frames = []
-    @stacks << [error.backtrace, error.message] if error
-    @stacks.each do |stack, info|
-      stack.reject!{ |raw_frame| reject?(raw_frame) }.reverse!
-      stack.each_with_index do |raw_frame, idx|
+    @stack = []
+    @backtraces << [error.backtrace, error.message] if error
+    @backtraces.each do |backtrace, info|
+      backtrace.reject!{ |raw_frame| reject?(raw_frame) }
+      backtrace.reverse!
+      backtrace.each_with_index do |raw_frame, idx|
         raw_frame = GemPaths.shorten(raw_frame)
-        frame = @frames[idx]
+        frame = @stack[idx]
         if frame == nil
           push_frame(raw_frame, idx)
         elsif frame.name != raw_frame
+          @stack = @stack.slice(0, idx + 1)
           push_frame(raw_frame, idx)
-          @frames = @frames.slice(0, idx + 1)
         end
       end
-      @frames.last.children << Info.new(info)
+      @stack.last.children << Info.new(info)
     end
-    @opt[:out].puts @frames[0].tree_graph
+    @opt[:out].puts @stack[0].tree_graph
   end
 
   private
 
   def push_frame(raw_frame, idx)
     frame = Frame.new(raw_frame)
-    @frames[idx - 1].children << frame if idx > 0
-    @frames[idx] = frame
+    @stack[idx - 1].children << frame if idx > 0
+    @stack[idx] = frame
   end
 
   def reject?(raw_frame)
