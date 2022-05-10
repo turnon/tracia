@@ -31,10 +31,7 @@ class Tracia
 
   def initialize(**opt)
     @frames_to_reject = Array(opt[:reject])
-    @logger = opt[:logger] || DefaultLogger
-    @frame_klass = @logger.const_get('Frame')
-    @info_klass = @logger.const_get('Info')
-    @error_klass = @logger.const_get('Error')
+    @logger = opt[:logger] || DefaultLogger.new
 
     @backtraces = []
     @level = 0
@@ -49,12 +46,12 @@ class Tracia
 
     @backtraces.each do |backtrace, info|
       build_road_from_root_to_leaf(backtrace)
-      @stack.last.children << @info_klass.new(info)
+      @stack.last.children << @logger.info(info)
     end
 
     if error
       build_road_from_root_to_leaf(error.backtrace)
-      @stack.last.children << @error_klass.new(error)
+      @stack.last.children << @logger.info(error)
     end
 
     @logger.output(@stack[0])
@@ -78,7 +75,7 @@ class Tracia
   end
 
   def push_frame(raw_frame, idx)
-    frame = @frame_klass.new(raw_frame)
+    frame = @logger.frame(raw_frame)
     @stack[idx - 1].children << frame if idx > 0
     @stack[idx] = frame
   end

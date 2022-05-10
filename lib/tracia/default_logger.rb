@@ -1,7 +1,7 @@
 require "tree_graph"
 
 class Tracia
-  module DefaultLogger
+  class DefaultLogger
     class Frame
       include TreeGraph
 
@@ -10,7 +10,6 @@ class Tracia
       def initialize(name)
         @name = name
         @children = []
-        @data = []
       end
 
       def label_for_tree_graph
@@ -24,42 +23,40 @@ class Tracia
 
     NO_CHILD = []
 
-    class Info
+    class Data
       include TreeGraph
 
-      def initialize(info)
-        @info = info
+      def initialize(data)
+        @data = data
       end
 
       def label_for_tree_graph
-        @info
+        @data
       end
 
       def children_for_tree_graph
         NO_CHILD
       end
-    end
 
-    class Error
-      include TreeGraph
-
-      def initialize(error)
-        @error_msg = error.message
-      end
-
-      def label_for_tree_graph
-        @error_msg
-      end
-
-      def children_for_tree_graph
+      def children
         NO_CHILD
       end
     end
 
-    class << self
-      def output(root)
-        puts root.tree_graph
-      end
+    def initialize(out: STDOUT)
+      @out = out
+    end
+
+    def frame(name)
+      Frame.new(name)
+    end
+
+    def info(data)
+      Data.new(data)
+    end
+
+    def output(root)
+      @out.puts root.tree_graph
     end
   end
 end
