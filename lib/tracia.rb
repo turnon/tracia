@@ -58,7 +58,7 @@ class Tracia
       @stack.last.children << @error_klass.new(error)
     end
 
-    @opt[:out].puts @stack[0].tree_graph
+    @logger.output(@stack[0])
   end
 
   private

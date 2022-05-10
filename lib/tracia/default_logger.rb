@@ -55,5 +55,11 @@ class Tracia
         NO_CHILD
       end
     end
+
+    class << self
+      def output(root)
+        puts root.tree_graph
+      end
+    end
   end
 end
