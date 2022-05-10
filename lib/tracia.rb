@@ -81,26 +81,36 @@ class Tracia
 
   def log
     @stack = []
-    @backtraces << [error.backtrace, error.message] if error
+
     @backtraces.each do |backtrace, info|
-      backtrace.reject!{ |raw_frame| reject?(raw_frame) }
-      backtrace.reverse!
-      backtrace.each_with_index do |raw_frame, idx|
-        raw_frame = GemPaths.shorten(raw_frame)
-        frame = @stack[idx]
-        if frame == nil
-          push_frame(raw_frame, idx)
-        elsif frame.name != raw_frame
-          @stack = @stack.slice(0, idx + 1)
-          push_frame(raw_frame, idx)
-        end
-      end
+      build_road_from_root_to_leaf(backtrace)
       @stack.last.children << Info.new(info)
     end
+
+    if error
+      build_road_from_root_to_leaf(error.backtrace)
+      @stack.last.children << Info.new(error.message)
+    end
+
     @opt[:out].puts @stack[0].tree_graph
   end
 
   private
+
+  def build_road_from_root_to_leaf(backtrace)
+    backtrace.reject!{ |raw_frame| reject?(raw_frame) }
+    backtrace.reverse!
+    backtrace.each_with_index do |raw_frame, idx|
+      raw_frame = GemPaths.shorten(raw_frame)
+      frame = @stack[idx]
+      if frame == nil
+        push_frame(raw_frame, idx)
+      elsif frame.name != raw_frame
+        @stack = @stack.slice(0, idx + 1)
+        push_frame(raw_frame, idx)
+      end
+    end
+  end
 
   def push_frame(raw_frame, idx)
     frame = Frame.new(raw_frame)
