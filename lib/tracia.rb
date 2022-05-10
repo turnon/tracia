@@ -30,9 +30,8 @@ class Tracia
   end
 
   def initialize(**opt)
-    @opt = opt
-    @opt_reject = Array(@opt[:reject])
-    @logger = @opt[:logger] || DefaultLogger
+    @frames_to_reject = Array(opt[:reject])
+    @logger = opt[:logger] || DefaultLogger
     @frame_klass = @logger.const_get('Frame')
     @info_klass = @logger.const_get('Info')
     @error_klass = @logger.const_get('Error')
@@ -85,6 +84,6 @@ class Tracia
   end
 
   def reject?(raw_frame)
-    @opt_reject.any?{ |rj| rj =~ raw_frame }
+    @frames_to_reject.any?{ |rj| rj =~ raw_frame }
   end
 end
