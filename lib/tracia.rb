@@ -54,7 +54,8 @@ class Tracia
       @stack.last.children << @logger.info(error)
     end
 
-    @logger.output(@stack[0])
+    root = @stack[0]
+    @logger.output(root) if root
   end
 
   private
