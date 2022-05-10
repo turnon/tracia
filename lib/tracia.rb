@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require_relative "tracia/version"
-require "tree_graph"
 require "tracia/gem_paths"
+require "tracia/default_logger"
 
 class Tracia
   class Error < StandardError; end
@@ -29,47 +29,13 @@ class Tracia
     end
   end
 
-  class Frame
-    include TreeGraph
-
-    attr_reader :name, :children
-
-    def initialize(name)
-      @name = name
-      @children = []
-      @data = []
-    end
-
-    def label_for_tree_graph
-      name
-    end
-
-    def children_for_tree_graph
-      children
-    end
-  end
-
-  class Info
-    include TreeGraph
-
-    NO_CHILD = []
-
-    def initialize(info)
-      @info = info
-    end
-
-    def label_for_tree_graph
-      @info
-    end
-
-    def children_for_tree_graph
-      NO_CHILD
-    end
-  end
-
   def initialize(**opt)
     @opt = opt
     @opt_reject = Array(@opt[:reject])
+    @logger = @opt[:logger] || DefaultLogger
+    @frame_klass = @logger.const_get('Frame')
+    @info_klass = @logger.const_get('Info')
+    @error_klass = @logger.const_get('Error')
 
     @backtraces = []
     @level = 0
@@ -84,12 +50,12 @@ class Tracia
 
     @backtraces.each do |backtrace, info|
       build_road_from_root_to_leaf(backtrace)
-      @stack.last.children << Info.new(info)
+      @stack.last.children << @info_klass.new(info)
     end
 
     if error
       build_road_from_root_to_leaf(error.backtrace)
-      @stack.last.children << Info.new(error.message)
+      @stack.last.children << @error_klass.new(error)
     end
 
     @opt[:out].puts @stack[0].tree_graph
@@ -113,7 +79,7 @@ class Tracia
   end
 
   def push_frame(raw_frame, idx)
-    frame = Frame.new(raw_frame)
+    frame = @frame_klass.new(raw_frame)
     @stack[idx - 1].children << frame if idx > 0
     @stack[idx] = frame
   end
