@@ -26,7 +26,7 @@ class TestTracia < Minitest::Test
     end
 
     def usual_call_deep
-      Tracia.add('usual_call')
+      Tracia.add({msg: 'usual_call'})
     end
 
     def trace_in_different_levels
@@ -34,17 +34,17 @@ class TestTracia < Minitest::Test
     end
 
     def trace_in_different_levels_lv1
-      Tracia.add('trace_in_different_levels_lv1 - 1')
+      Tracia.add({msg:'trace_in_different_levels_lv1 - 1'})
       trace_in_different_levels_lv2
-      Tracia.add('trace_in_different_levels_lv1 - 2')
+      Tracia.add({msg: 'trace_in_different_levels_lv1 - 2'})
     end
 
     def trace_in_different_levels_lv2
-      Tracia.add('trace_in_different_levels_lv2')
+      Tracia.add({msg: 'trace_in_different_levels_lv2'})
     end
 
     def recursive_call(n = 5)
-      Tracia.add("recursive_call #{n}")
+      Tracia.add({msg: "recursive_call #{n}"})
       if n <= 0
         return
       end
@@ -62,7 +62,7 @@ class TestTracia < Minitest::Test
     end
 
     def loop_call_lv2
-      Tracia.add('loop_call')
+      Tracia.add({msg: 'loop_call'})
     end
 
     def call_dynamic_methods
@@ -76,7 +76,7 @@ class TestTracia < Minitest::Test
     end
 
     def call_dynamic_method_6
-      Tracia.add('call_dynamic_methods')
+      Tracia.add({msg: 'call_dynamic_methods'})
     end
 
     def method_missing(method_name, *args, &block)
@@ -84,7 +84,7 @@ class TestTracia < Minitest::Test
     end
 
     def method_not_found(method_name, *args)
-      Tracia.add("method_not_found #{method_name}(*#{args})")
+      Tracia.add({msg: "method_not_found #{method_name}(*#{args})"})
     end
 
     def raise_error
@@ -105,7 +105,7 @@ class TestTracia < Minitest::Test
       end
 
       def call_singleton_lv2
-        Tracia.add('call_singleton')
+        Tracia.add({msg: 'call_singleton'})
       end
     end
   end

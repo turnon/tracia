@@ -45,32 +45,54 @@ end
 A Template to make custom logger
 
 ```ruby
-module MyLogger
+class MyLogger
   class Frame
     attr_reader :name, :children
 
     def initialize(name)
-      # ...
+      @name = name
+      @children = []
     end
   end
 
-  class Info
-    def initialize(info)
-      # ...
+  NO_CHILD = []
+
+  class Data
+    def initialize(data)
+      @data = data
+    end
+
+    def children
+      NO_CHILD
     end
   end
 
-  class Error
-    def initialize(error)
-      # ...
-    end
+  def initialize(database)
+    @database = database
   end
 
-  class << self
-    def output(root)
-      # ...
-    end
+  def frame(name)
+    # ...
+    Frame.new(name)
   end
+
+  def info(data)
+    # ...
+    Data.new(data)
+  end
+
+  def output(root)
+    # ...
+    @database.insert(root)
+  end
+end
+```
+
+Pass the custom logger to Tracia
+
+```ruby
+Tracia.start(logger: MyLogger.new(db_connection)) do
+  # ..
 end
 ```
 
