@@ -1,8 +1,6 @@
 # Tracia
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/tracia`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Construct call stack in tree-style
 
 ## Installation
 
@@ -22,7 +20,59 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Put `Tracia.add` in method call
+
+```ruby
+def do_something
+  do_somthing_deep
+end
+
+def do_something_deep
+  Tracia.add("I am working on something deep")
+end
+```
+
+Wrap the call with `Tracia.start`
+
+```ruby
+Tracia.start do
+  do_something()
+end
+```
+
+### Custom Logger
+
+A Template to make custom logger
+
+```ruby
+module MyLogger
+  class Frame
+    attr_reader :name, :children
+
+    def initialize(name)
+      # ...
+    end
+  end
+
+  class Info
+    def initialize(info)
+      # ...
+    end
+  end
+
+  class Error
+    def initialize(error)
+      # ...
+    end
+  end
+
+  class << self
+    def output(root)
+      # ...
+    end
+  end
+end
+```
 
 ## Development
 
