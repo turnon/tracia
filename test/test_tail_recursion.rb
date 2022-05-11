@@ -7,7 +7,8 @@ class TestTailRecursion < Minitest::Test
     def run(n: 5)
       walk(n)
       swim
-      jump(n - 1) if n > 0
+      1 / n
+      jump(n - 1)
     end
 
     def walk(n)
@@ -19,6 +20,7 @@ class TestTailRecursion < Minitest::Test
     end
 
     def jump(num)
+      Tracia.add('jump')
       run(n: num)
     end
   end
@@ -27,6 +29,7 @@ class TestTailRecursion < Minitest::Test
     Tracia.start(non_tail_recursion: true) do
       SomeRecursionTest.new.run
     end
+  rescue ZeroDivisionError
   end
 
 end
