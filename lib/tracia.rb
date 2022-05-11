@@ -92,7 +92,7 @@ class Tracia
     end
 
     def klass_and_method
-      "#{@klass}#{@call_sym}#{method_name}"
+      @klass_and_method ||= "#{@klass}#{@call_sym}#{method_name}"
     end
 
     def label_for_tree_graph
@@ -121,7 +121,9 @@ class Tracia
     @stack = []
 
     @backtraces.each do |backtrace, info|
-      build_road_from_root_to_leaf(backtrace)
+      build_road_from_root_to_leaf(backtrace) do |sibling_frame, current_frame|
+        sibling_frame.klass_and_method != current_frame.klass_and_method
+      end
       @stack.last.children << @logger.info(info)
     end
 
@@ -130,7 +132,10 @@ class Tracia
         m = bt.match(SRC_LOC_MATCHER)
         Frame.new(nil, nil, m[2], m[1], m[1])
       end
-      build_road_from_root_to_leaf(err_backtrace, true)
+      build_road_from_root_to_leaf(err_backtrace) do |sibling_frame, current_frame|
+        sibling_frame.method_name != current_frame.method_name &&
+          sibling_frame.binding_source_location != current_frame.binding_source_location
+      end
       @stack.last.children << @logger.info(error)
     end
 
@@ -164,16 +169,13 @@ class Tracia
     end
   end
 
-  def build_road_from_root_to_leaf(backtrace, err = nil)
+  def build_road_from_root_to_leaf(backtrace, &diff)
     backtrace.reject!{ |raw_frame| reject?(raw_frame) }
     backtrace.each_with_index do |raw_frame, idx|
       frame = @stack[idx]
       if frame == nil
         push_frame(raw_frame, idx)
-      elsif err && (frame.method_name != raw_frame.method_name && frame.binding_source_location != raw_frame.binding_source_location)
-        @stack = @stack.slice(0, idx + 1)
-        push_frame(raw_frame, idx)
-      elsif !err && (frame.klass_and_method != raw_frame.klass_and_method)
+      elsif diff[frame, raw_frame]
         @stack = @stack.slice(0, idx + 1)
         push_frame(raw_frame, idx)
       end
