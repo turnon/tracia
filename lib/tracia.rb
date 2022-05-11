@@ -1,11 +1,16 @@
 # frozen_string_literal: true
 
-require_relative "tracia/version"
+require "tracia/version"
 require "tracia/gem_paths"
 require "tracia/default_logger"
 
+require "binding_of_callers"
+
 class Tracia
   class Error < StandardError; end
+
+  SRC_LOC_SEPERATOR = ':'
+  SRC_LOC_MATCHER = /(.*):in `(.*)'/
 
   attr_accessor :level, :error
 
@@ -25,7 +30,48 @@ class Tracia
 
     def add(info)
       trc = Thread.current[:_tracia_]
-      trc.add(caller, info) if trc
+      return unless trc
+
+      backtrace = caller
+      full_callers = []
+
+      callers = binding.of_callers
+      callers.map!{ |c| Frame.new(c._binding.source_location.join(SRC_LOC_SEPERATOR), c.klass, c.call_symbol, c.frame_env) }
+      callers.reverse_each do |frame|
+        loop do
+          backtrace_frame = backtrace.pop
+          break unless backtrace_frame
+          m = backtrace_frame.match(SRC_LOC_MATCHER)
+          break if frame.source_location == m[1] && frame.method_name == m[2]
+          full_callers << Frame.new(m[1], nil, nil, m[2])
+        end
+        full_callers << frame
+      end
+      full_callers.pop
+
+      trc.add(full_callers, info)
+    end
+  end
+
+  class Frame
+    include TreeGraph
+
+    attr_reader :source_location, :method_name, :children
+
+    def initialize(source_location, klass, call_sym, method_name)
+      @source_location = source_location
+      @klass = klass
+      @call_sym = call_sym
+      @method_name = method_name
+      @children ||= []
+    end
+
+    def label_for_tree_graph
+      "#{@klass}#{@call_sym}#{method_name} #{source_location}"
+    end
+
+    def children_for_tree_graph
+      children
     end
   end
 
@@ -51,7 +97,11 @@ class Tracia
     end
 
     if error
-      build_road_from_root_to_leaf(error.backtrace)
+      err_backtrace = error.backtrace.reverse_each.map do |bt|
+        m = bt.match(SRC_LOC_MATCHER)
+        Frame.new(m[1],  nil, nil, m[2])
+      end
+      build_road_from_root_to_leaf(err_backtrace)
       @stack.last.children << @logger.info(error)
     end
 
@@ -87,26 +137,28 @@ class Tracia
 
   def build_road_from_root_to_leaf(backtrace)
     backtrace.reject!{ |raw_frame| reject?(raw_frame) }
-    backtrace.reverse!
+    # backtrace.reverse!
     backtrace.each_with_index do |raw_frame, idx|
-      raw_frame = GemPaths.shorten(raw_frame)
+      # raw_frame = GemPaths.shorten(raw_frame)
       frame = @stack[idx]
       if frame == nil
         push_frame(raw_frame, idx)
-      elsif frame.name != raw_frame
+      elsif frame.source_location != raw_frame.source_location || frame.method_name != raw_frame.method_name
         @stack = @stack.slice(0, idx + 1)
         push_frame(raw_frame, idx)
       end
     end
+
+    @stack = @stack.slice(0, backtrace.size) if @stack.size > backtrace.size
   end
 
-  def push_frame(raw_frame, idx)
-    frame = @logger.frame(raw_frame)
+  def push_frame(frame, idx)
+    # frame = @logger.frame(raw_frame)
     @stack[idx - 1].children << frame if idx > 0
     @stack[idx] = frame
   end
 
   def reject?(raw_frame)
-    @frames_to_reject.any?{ |rj| rj =~ raw_frame }
+    @frames_to_reject.any?{ |rj| rj =~ raw_frame.source_location }
   end
 end
