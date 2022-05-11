@@ -80,7 +80,7 @@ class Tracia
   class Frame
     include TreeGraph
 
-    attr_reader :binding_source_location, :method_name, :children
+    attr_reader :binding_source_location, :klass, :call_sym, :method_name, :children
 
     def initialize(klass, call_sym, method_name, binding_source_location, real_source_location)
       @binding_source_location = binding_source_location
@@ -88,15 +88,22 @@ class Tracia
       @klass = klass
       @call_sym = call_sym
       @method_name = method_name
-      @children ||= []
+      @children = []
     end
 
-    def klass_and_method
-      @klass_and_method ||= "#{@klass}#{@call_sym}#{method_name}"
+    def same_klass_and_method?(other_frame)
+      klass == other_frame.klass &&
+        call_sym == other_frame.call_sym &&
+        method_name == other_frame.method_name
+    end
+
+    def diff_method_src_loc?(other_frame)
+      method_name != other_frame.method_name &&
+        binding_source_location != other_frame.binding_source_location
     end
 
     def label_for_tree_graph
-      "#{klass_and_method} #{@real_source_location}"
+      "#{klass}#{call_sym}#{method_name} #{@real_source_location}"
     end
 
     def children_for_tree_graph
@@ -122,7 +129,7 @@ class Tracia
 
     @backtraces.each do |backtrace, info|
       build_road_from_root_to_leaf(backtrace) do |sibling_frame, current_frame|
-        sibling_frame.klass_and_method != current_frame.klass_and_method
+        !sibling_frame.same_klass_and_method?(current_frame)
       end
       @stack.last.children << @logger.info(info)
     end
@@ -133,8 +140,7 @@ class Tracia
         Frame.new(nil, nil, m[2], m[1], m[1])
       end
       build_road_from_root_to_leaf(err_backtrace) do |sibling_frame, current_frame|
-        sibling_frame.method_name != current_frame.method_name &&
-          sibling_frame.binding_source_location != current_frame.binding_source_location
+        sibling_frame.diff_method_src_loc?(current_frame)
       end
       @stack.last.children << @logger.info(error)
     end
@@ -154,9 +160,9 @@ class Tracia
 
     current_frame.children.each_with_index do |child, idx|
       next non_tail_recursion!([child]) if last_idx != idx
-      next unless child.respond_to?(:klass_and_method)
+      next unless Frame === child
 
-      recursion_idx = stack.index{ |frame| frame.klass_and_method == child.klass_and_method }
+      recursion_idx = stack.index{ |frame| frame.same_klass_and_method?(child) }
       if recursion_idx
         parent = stack[recursion_idx - 1]
         parent.children << child
