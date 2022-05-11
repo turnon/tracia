@@ -103,7 +103,7 @@ class Tracia
     end
 
     def label_for_tree_graph
-      "#{klass}#{call_sym}#{method_name} #{@real_source_location}"
+      "#{klass}#{call_sym}#{method_name} #{GemPaths.shorten(@real_source_location)}"
     end
 
     def children_for_tree_graph
