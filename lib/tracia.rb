@@ -31,6 +31,7 @@ class Tracia
 
   def initialize(**opt)
     @frames_to_reject = Array(opt[:reject])
+    @non_tail_recursion = opt[:non_tail_recursion]
     @logger = opt[:logger] || DefaultLogger.new
 
     @backtraces = []
@@ -55,10 +56,34 @@ class Tracia
     end
 
     root = @stack[0]
-    @logger.output(root) if root
+    if root
+      non_tail_recursion!([root]) if @non_tail_recursion
+      @logger.output(root)
+    end
   end
 
   private
+
+  def non_tail_recursion!(stack)
+    current_frame = stack.last
+    last_idx = current_frame.children.count - 1
+
+    current_frame.children.each_with_index do |child, idx|
+      next non_tail_recursion!([child]) if last_idx != idx
+      next unless child.respond_to?(:name)
+
+      recursion_idx = stack.index{ |frame| frame.name == child.name }
+      if recursion_idx
+        parent = stack[recursion_idx - 1]
+        parent.children << child
+        current_frame.children.pop
+        non_tail_recursion!([parent, child])
+      else
+        stack.push(child)
+        non_tail_recursion!(stack)
+      end
+    end
+  end
 
   def build_road_from_root_to_leaf(backtrace)
     backtrace.reject!{ |raw_frame| reject?(raw_frame) }
