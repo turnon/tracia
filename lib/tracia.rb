@@ -9,8 +9,6 @@ require "binding_of_callers"
 class Tracia
   class Error < StandardError; end
 
-  SRC_LOC_SEPERATOR = ':'
-  SRC_LOC_MATCHER = /(.*):in `(.*)'/
   INSTANCE_METHOD_SHARP = '#'
 
   attr_accessor :level, :error
@@ -46,11 +44,11 @@ class Tracia
   class Frame
     include TreeGraph
 
-    attr_reader :binding_source_location, :klass, :call_sym, :method_name, :children
+    attr_reader :klass, :call_sym, :method_name, :children
 
-    def initialize(klass, call_sym, method_name, binding_source_location, real_source_location)
-      @binding_source_location = binding_source_location
-      @real_source_location = real_source_location
+    def initialize(klass, call_sym, method_name, file, lineno)
+      @file = file
+      @lineno = lineno
       @klass = klass
       @call_sym = call_sym
       @method_name = method_name
@@ -64,7 +62,7 @@ class Tracia
     end
 
     def label_for_tree_graph
-      "#{klass}#{call_sym}#{method_name} #{GemPaths.shorten(@real_source_location)}"
+      "#{klass}#{call_sym}#{method_name} #{GemPaths.shorten(@file)}:#{@lineno}"
     end
 
     def children_for_tree_graph
@@ -174,17 +172,15 @@ class Tracia
       call_symbol = c.call_symbol
       frame_env = c.frame_env
 
-      binding_source_location = _binding.source_location.join(SRC_LOC_SEPERATOR)
-
-      real_source_location =
+      source_location =
         if _binding.frame_type == :method
           meth = call_symbol == INSTANCE_METHOD_SHARP ? klass.instance_method(frame_env) : klass.method(frame_env)
-          meth.source_location.join(SRC_LOC_SEPERATOR)
+          meth.source_location
         else
-          binding_source_location
+          _binding.source_location
         end
 
-      Frame.new(klass, call_symbol, frame_env, binding_source_location, real_source_location)
+      Frame.new(klass, call_symbol, frame_env, source_location[0], source_location[1])
     end
 
     callers
