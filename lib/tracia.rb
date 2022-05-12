@@ -44,7 +44,7 @@ class Tracia
   class Frame
     include TreeGraph
 
-    attr_reader :klass, :call_sym, :method_name, :children
+    attr_reader :klass, :call_sym, :method_name, :children, :file
 
     def initialize(klass, call_sym, method_name, file, lineno)
       @file = file
@@ -162,7 +162,7 @@ class Tracia
   end
 
   def reject?(raw_frame)
-    @frames_to_reject.any?{ |rj| rj =~ raw_frame.source_location }
+    @frames_to_reject.any?{ |rj| rj =~ raw_frame.file }
   end
 
   def convert_to_frames(callers)
