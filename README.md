@@ -46,42 +46,11 @@ A Template to make custom logger
 
 ```ruby
 class MyLogger
-  class Frame
-    attr_reader :name, :children
-
-    def initialize(name)
-      @name = name
-      @children = []
-    end
-  end
-
-  NO_CHILD = []
-
-  class Data
-    def initialize(data)
-      @data = data
-    end
-
-    def children
-      NO_CHILD
-    end
-  end
-
   def initialize(database)
     @database = database
   end
 
-  def frame(name)
-    # ...
-    Frame.new(name)
-  end
-
-  def info(data)
-    # ...
-    Data.new(data)
-  end
-
-  def output(root)
+  def call(root)
     # ...
     @database.insert(root)
   end
