@@ -84,13 +84,13 @@ class Tracia
 
     @backtraces.each do |backtrace, info|
       build_road_from_root_to_leaf(backtrace)
-      @stack.last.children << @logger.info(info)
+      @stack.last.children << info
     end
 
     root = @stack[0]
     if root
       non_tail_recursion!([root]) if @non_tail_recursion
-      @logger.output(root)
+      @logger.call(root)
     end
   end
 
