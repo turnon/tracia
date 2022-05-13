@@ -86,10 +86,11 @@ class Tracia
   def enable_trace_point
     current_thread = Thread.current
     @trace_point = TracePoint.new(:raise) do |point|
-      backtrace = point.binding.eval("binding.of_callers(binding.frame_count - #{depth})")
+      bd = point.binding
+      next unless current_thread == bd.eval('Thread.current')
+      backtrace = bd.eval("binding.of_callers(binding.frame_count - #{depth})")
       raiser = backtrace[0]
       next if raiser.klass == Tracia && raiser.frame_env == 'rescue in start'
-      next unless current_thread == point.binding.eval('Thread.current')
       backtrace.reverse!
       backtrace.pop
       backtrace.pop
