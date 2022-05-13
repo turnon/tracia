@@ -1,5 +1,3 @@
-require "tree_graph"
-
 class Tracia
   class DefaultLogger
     NO_CHILD = []
