@@ -36,7 +36,6 @@ class Tracia
       return unless trc
 
       backtrace = binding.of_callers(binding.frame_count - trc.depth)
-      # backtrace = binding.of_callers
       backtrace.reverse!
       backtrace.pop
       trc.add(backtrace, info)
@@ -130,8 +129,8 @@ class Tracia
     last_idx = current_frame.children.count - 1
 
     current_frame.children.each_with_index do |child, idx|
-      next non_tail_recursion!([child]) if last_idx != idx
       next unless Frame === child
+      next non_tail_recursion!([child]) if last_idx != idx
 
       recursion_idx = stack.index{ |frame| frame.same_klass_and_method?(child) }
       if recursion_idx
