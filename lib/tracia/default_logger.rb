@@ -1,45 +1,16 @@
-require "tree_graph"
-
 class Tracia
   class DefaultLogger
-    class Frame
-      include TreeGraph
-
-      attr_reader :name, :children
-
-      def initialize(name)
-        @name = name
-        @children = []
-      end
-
-      def label_for_tree_graph
-        name
-      end
-
-      def children_for_tree_graph
-        children
-      end
-    end
-
     NO_CHILD = []
 
-    class Data
-      include TreeGraph
+    class << self
+      def tree_graph_everything!
+        Object.define_method(:label_for_tree_graph) do
+          to_s
+        end
 
-      def initialize(data)
-        @data = data
-      end
-
-      def label_for_tree_graph
-        @data
-      end
-
-      def children_for_tree_graph
-        NO_CHILD
-      end
-
-      def children
-        NO_CHILD
+        Object.define_method(:children_for_tree_graph) do
+          NO_CHILD
+        end
       end
     end
 
@@ -47,15 +18,7 @@ class Tracia
       @out = out
     end
 
-    def frame(name)
-      Frame.new(name)
-    end
-
-    def info(data)
-      Data.new(data)
-    end
-
-    def output(root)
+    def call(root)
       @out.puts root.tree_graph
     end
   end
