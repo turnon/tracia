@@ -2,6 +2,7 @@
 
 require "tracia/version"
 require "tracia/gem_paths"
+require "tracia/frame"
 require "tracia/default_logger"
 
 require "binding_of_callers"
@@ -36,39 +37,9 @@ class Tracia
       return unless trc
 
       backtrace = binding.of_callers(binding.frame_count - trc.depth)
-      # backtrace = binding.of_callers
       backtrace.reverse!
       backtrace.pop
       trc.add(backtrace, info)
-    end
-  end
-
-  class Frame
-    include TreeGraph
-
-    attr_reader :klass, :call_sym, :method_name, :children, :file
-
-    def initialize(klass, call_sym, method_name, file, lineno)
-      @file = file
-      @lineno = lineno
-      @klass = klass
-      @call_sym = call_sym
-      @method_name = method_name
-      @children = []
-    end
-
-    def same_klass_and_method?(other_frame)
-      klass == other_frame.klass &&
-        call_sym == other_frame.call_sym &&
-        method_name == other_frame.method_name
-    end
-
-    def label_for_tree_graph
-      "#{klass}#{call_sym}#{method_name} #{GemPaths.shorten(@file)}:#{@lineno}"
-    end
-
-    def children_for_tree_graph
-      children
     end
   end
 
@@ -113,13 +84,13 @@ class Tracia
 
     @backtraces.each do |backtrace, info|
       build_road_from_root_to_leaf(backtrace)
-      @stack.last.children << @logger.info(info)
+      @stack.last.children << info
     end
 
     root = @stack[0]
     if root
       non_tail_recursion!([root]) if @non_tail_recursion
-      @logger.output(root)
+      @logger.call(root)
     end
   end
 
@@ -130,8 +101,8 @@ class Tracia
     last_idx = current_frame.children.count - 1
 
     current_frame.children.each_with_index do |child, idx|
-      next non_tail_recursion!([child]) if last_idx != idx
       next unless Frame === child
+      next non_tail_recursion!([child]) if last_idx != idx
 
       recursion_idx = stack.index{ |frame| frame.same_klass_and_method?(child) }
       if recursion_idx
