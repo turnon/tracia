@@ -7,11 +7,11 @@ class Tracia
     attr_reader :klass, :call_sym, :method_name, :children, :file
 
     def initialize(klass, call_sym, method_name, file, lineno)
-      @file = file
-      @lineno = lineno
       @klass = klass
       @call_sym = call_sym
       @method_name = method_name
+      @file = file
+      @lineno = lineno
       @children = []
     end
 

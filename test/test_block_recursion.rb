@@ -3,7 +3,7 @@
 require "test_helper"
 
 class TestBlockRecursion < Minitest::Test
-  class BlockRecursionTest
+  class BlockRecursion
     def run
       block = -> (n) do
         walk(n)
@@ -12,6 +12,10 @@ class TestBlockRecursion < Minitest::Test
       end
 
       block[5]
+    end
+
+    def fly
+      Tracia.add({msg: 'parallel call'})
     end
 
     def walk(n)
@@ -24,8 +28,10 @@ class TestBlockRecursion < Minitest::Test
   end
 
   def test_tail_recursion
+    block_recursion = BlockRecursion.new
     Tracia.start(non_tail_recursion: true) do
-      BlockRecursionTest.new.run
+      block_recursion.fly
+      block_recursion.run
     end
   rescue ZeroDivisionError
   end

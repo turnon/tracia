@@ -3,7 +3,7 @@
 require "test_helper"
 
 class TestNormal < Minitest::Test
-  class SomeTest
+  class Something
     class ErrTest < StandardError; end
 
     def run
@@ -15,6 +15,10 @@ class TestNormal < Minitest::Test
       call_undefined_method
       self.class.call_singleton_lv1
       raise_error
+    end
+
+    def fly
+      Tracia.add({msg: 'parallel call'})
     end
 
     def usual_call
@@ -107,10 +111,12 @@ class TestNormal < Minitest::Test
   end
 
   def test_normal
+    something = Something.new
     Tracia.start(out: STDOUT) do
-      SomeTest.new.run
+      something.fly
+      something.run
     end
-  rescue SomeTest::ErrTest
+  rescue Something::ErrTest
   end
 
 end

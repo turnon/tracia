@@ -18,7 +18,7 @@ class Tracia
     def start(**opt)
       trc = (Thread.current[:_tracia_] ||= new(**opt))
       trc.level += 1
-      trc.depth = binding.frame_count - 4
+      trc.depth = binding.frame_count - 3
       yield
     rescue StandardError => e
       trc.error = e
