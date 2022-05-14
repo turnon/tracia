@@ -42,7 +42,17 @@ end
 
 ### Custom Logger
 
-A Template to make custom logger
+By default, Tracia writes result to STDOUT, you can set it somewhere else
+
+```ruby
+file = File.new('/path/to/log.txt', 'w+')
+
+Tracia.start(logger: Tracia::DefaultLogger.new(out: file)) do
+  # ...
+end
+```
+
+Or you can make a logger class which responds to `call`
 
 ```ruby
 class MyLogger
@@ -50,6 +60,7 @@ class MyLogger
     @database = database
   end
 
+  # callback method for Tracia
   def call(root)
     # ...
     @database.insert(root)
@@ -57,7 +68,7 @@ class MyLogger
 end
 ```
 
-Pass the custom logger to Tracia
+Then pass that logger to Tracia
 
 ```ruby
 Tracia.start(logger: MyLogger.new(db_connection)) do
