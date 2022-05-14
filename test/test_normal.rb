@@ -110,13 +110,73 @@ class TestNormal < Minitest::Test
     end
   end
 
+  EXPECTED = <<EOS
+TestNormal#block in test_normal #{__dir__}/test_normal.rb:172
+├─TestNormal::Something#fly #{__dir__}/test_normal.rb:20
+│ └─{:msg=>"parallel call"}
+└─TestNormal::Something#run #{__dir__}/test_normal.rb:9
+  ├─TestNormal::Something#usual_call #{__dir__}/test_normal.rb:24
+  │ └─TestNormal::Something#usual_call_deep #{__dir__}/test_normal.rb:28
+  │   └─{:msg=>"usual_call"}
+  ├─TestNormal::Something#trace_in_different_levels #{__dir__}/test_normal.rb:32
+  │ └─TestNormal::Something#trace_in_different_levels_lv1 #{__dir__}/test_normal.rb:36
+  │   ├─{:msg=>"trace_in_different_levels_lv1 - 1"}
+  │   ├─TestNormal::Something#trace_in_different_levels_lv2 #{__dir__}/test_normal.rb:42
+  │   │ └─{:msg=>"trace_in_different_levels_lv2"}
+  │   └─{:msg=>"trace_in_different_levels_lv1 - 2"}
+  ├─TestNormal::Something#recursive_call #{__dir__}/test_normal.rb:46
+  │ ├─{:msg=>"recursive_call 5"}
+  │ └─TestNormal::Something#recursive_call #{__dir__}/test_normal.rb:46
+  │   ├─{:msg=>"recursive_call 4"}
+  │   └─TestNormal::Something#recursive_call #{__dir__}/test_normal.rb:46
+  │     ├─{:msg=>"recursive_call 3"}
+  │     └─TestNormal::Something#recursive_call #{__dir__}/test_normal.rb:46
+  │       ├─{:msg=>"recursive_call 2"}
+  │       └─TestNormal::Something#recursive_call #{__dir__}/test_normal.rb:46
+  │         ├─{:msg=>"recursive_call 1"}
+  │         └─TestNormal::Something#recursive_call #{__dir__}/test_normal.rb:46
+  │           └─{:msg=>"recursive_call 0"}
+  ├─TestNormal::Something#loop_call #{__dir__}/test_normal.rb:54
+  │ └─TestNormal::Something#block in loop_call #{__dir__}/test_normal.rb:56
+  │   └─TestNormal::Something#loop_call_lv1 #{__dir__}/test_normal.rb:60
+  │     └─TestNormal::Something#loop_call_lv2 #{__dir__}/test_normal.rb:64
+  │       ├─{:msg=>"loop_call"}
+  │       ├─{:msg=>"loop_call"}
+  │       └─{:msg=>"loop_call"}
+  ├─TestNormal::Something#call_dynamic_methods #{__dir__}/test_normal.rb:68
+  │ └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
+  │   └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
+  │     └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
+  │       └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
+  │         └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
+  │           └─TestNormal::Something#call_dynamic_method_6 #{__dir__}/test_normal.rb:78
+  │             └─{:msg=>"call_dynamic_methods"}
+  ├─TestNormal::Something#method_missing #{__dir__}/test_normal.rb:82
+  │ └─TestNormal::Something#method_not_found #{__dir__}/test_normal.rb:86
+  │   └─{:msg=>"method_not_found call_undefined_method(*[])"}
+  ├─TestNormal::Something.call_singleton_lv1 #{__dir__}/test_normal.rb:103
+  │ └─TestNormal::Something.call_singleton_lv2 #{__dir__}/test_normal.rb:107
+  │   └─{:msg=>"call_singleton"}
+  └─TestNormal::Something#raise_error #{__dir__}/test_normal.rb:90
+    └─TestNormal::Something#raise_error_lv1 #{__dir__}/test_normal.rb:94
+      └─TestNormal::Something#raise_error_lv2 #{__dir__}/test_normal.rb:98
+        └─something wrong !
+EOS
+
   def test_normal
     something = Something.new
-    Tracia.start(out: STDOUT) do
-      something.fly
-      something.run
+    sio = StringIO.new
+
+    begin
+      Tracia.start(logger: Tracia::DefaultLogger.new(out: sio)) do
+        something.fly
+        something.run
+      end
+    rescue Something::ErrTest
     end
-  rescue Something::ErrTest
+
+    sio.rewind
+    assert_equal EXPECTED, sio.read
   end
 
 end
