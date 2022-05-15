@@ -18,7 +18,7 @@ class Tracia
     def start(**opt)
       trc = (Thread.current[:_tracia_] ||= new(**opt))
       trc.level += 1
-      trc.depth = binding.frame_count - 3
+      trc.depth = binding.frame_count + 1
       yield
     rescue StandardError => e
       trc.error = e
@@ -36,7 +36,7 @@ class Tracia
       trc = Thread.current[:_tracia_]
       return unless trc
 
-      backtrace = binding.of_callers(binding.frame_count - trc.depth)
+      backtrace = binding.partial_callers(-trc.depth)
       backtrace.reverse!
       backtrace.pop
       trc.add(backtrace, info)
@@ -59,7 +59,7 @@ class Tracia
     @trace_point = TracePoint.new(:raise) do |point|
       bd = point.binding
       next unless current_thread == bd.eval('Thread.current')
-      backtrace = bd.eval("binding.of_callers(binding.frame_count - #{depth})")
+      backtrace = bd.eval("binding.partial_callers(-#{depth})")
       raiser = backtrace[0]
       next if raiser.klass == Tracia && raiser.frame_env == 'rescue in start'
       backtrace.reverse!
