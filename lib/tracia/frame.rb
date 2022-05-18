@@ -4,7 +4,7 @@ class Tracia
   class Frame
     include TreeGraph
 
-    attr_reader :klass, :call_sym, :method_name, :children, :file
+    attr_reader :klass, :call_sym, :method_name, :children, :file, :lineno
 
     def initialize(klass, call_sym, method_name, file, lineno)
       @klass = klass
