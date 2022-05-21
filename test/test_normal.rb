@@ -165,18 +165,17 @@ EOS
 
   def test_normal
     something = Something.new
-    sio = StringIO.new
+    logger = Tracia::TestLogger.new
 
     begin
-      Tracia.start(logger: Tracia::DefaultLogger.new(out: sio)) do
+      Tracia.start(logger: logger) do
         something.fly
         something.run
       end
     rescue Something::ErrTest
     end
 
-    sio.rewind
-    assert_equal EXPECTED, sio.read
+    assert_equal EXPECTED, logger.read
   end
 
 end
