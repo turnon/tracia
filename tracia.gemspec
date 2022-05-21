@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["block24block@gmail.com"]
 
   spec.summary = "bottum-up tracing"
-  spec.homepage      = "https://github.com/turnon/tracia"
+  spec.homepage = "https://github.com/turnon/tracia"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
 
@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry"
 
   spec.add_dependency "tree_graph", "~> 0.2.4"
+  spec.add_dependency "tree_html", "~> 0.1.8"
   spec.add_dependency "binding_of_callers", "~> 0.2.3"
 
   # Uncomment to register a new dependency of your gem

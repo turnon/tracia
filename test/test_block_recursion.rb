@@ -55,18 +55,17 @@ EOS
 
   def test_tail_recursion
     block_recursion = BlockRecursion.new
-    sio = StringIO.new
+    logger = Tracia::TestLogger.new
 
     begin
-      Tracia.start(non_tail_recursion: true, logger: Tracia::DefaultLogger.new(out: sio)) do
+      Tracia.start(non_tail_recursion: true, logger: logger) do
         block_recursion.fly
         block_recursion.run
       end
     rescue ZeroDivisionError
     end
 
-    sio.rewind
-    assert_equal EXPECTED, sio.read
+    assert_equal EXPECTED, logger.read
   end
 
 end
