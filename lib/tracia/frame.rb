@@ -50,16 +50,7 @@ class Tracia
       "#{klass}#{call_sym}#{method_name}"
     end
 
-    INSTANCE_METHOD_SHARP = '#'
-
     def source_location
-      if @file == nil
-        meth = call_sym == INSTANCE_METHOD_SHARP ? klass.instance_method(method_name) : klass.method(method_name)
-        src_loc = meth.source_location
-        @file = src_loc[0]
-        @lineno = src_loc[1]
-      end
-
       "#{GemPaths.shorten(@file)}:#{@lineno}"
     end
   end
