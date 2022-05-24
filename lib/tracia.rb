@@ -32,13 +32,14 @@ class Tracia
       trc.log if trc.level == 0
     end
 
-    def add(info)
+    def add(info = nil, &block)
       trc = Thread.current[:_tracia_]
       return unless trc
 
       backtrace = binding.partial_callers(-trc.depth)
       backtrace.reverse!
       backtrace.pop
+      info = block.call if block
       trc.add(backtrace, info)
     end
   end
