@@ -45,9 +45,9 @@ end
 By default, Tracia writes result to STDOUT, you can set it somewhere else
 
 ```ruby
-file = File.new('/path/to/log.txt', 'w+')
+file = File.new('/path/to/log.html', 'w+')
 
-Tracia.start(logger: Tracia::DefaultLogger.new(out: file)) do
+Tracia.start(logger: Tracia::DefaultLogger.new(out: file, html: true)) do
   # ...
 end
 ```

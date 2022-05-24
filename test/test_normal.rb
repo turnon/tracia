@@ -26,7 +26,7 @@ class TestNormal < Minitest::Test
     end
 
     def usual_call_deep
-      Tracia.add({msg: 'usual_call'})
+      Tracia.add{{msg: 'usual_call'}}
     end
 
     def trace_in_different_levels

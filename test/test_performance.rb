@@ -30,9 +30,12 @@ class TestPerformance < Minitest::Test
   def test_performance
     skip unless ENV['PERF']
 
-    puts Process.pid
-    spawn("sudo rbspy record --pid #{Process.pid}")
-    sleep 1
+    if RUBY_VERSION < '3.0.0'
+      puts Process.pid
+      spawn("sudo rbspy record --pid #{Process.pid}")
+      sleep 1
+    end
+
     perf = Perf.new
 
     begin_trace = Time.now
