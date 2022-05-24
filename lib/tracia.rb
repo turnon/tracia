@@ -10,8 +10,6 @@ require "binding_of_callers"
 class Tracia
   class Error < StandardError; end
 
-  INSTANCE_METHOD_SHARP = '#'
-
   attr_accessor :level, :error, :depth
 
   class << self
@@ -142,6 +140,8 @@ class Tracia
     @frames_to_reject.any?{ |rj| rj =~ raw_frame.file }
   end
 
+  EMPTY_SRC_LOC = []
+
   def convert_to_frames(callers)
     callers.map! do |c|
       _binding = c._binding
@@ -151,8 +151,9 @@ class Tracia
 
       source_location =
         if _binding.frame_type == :method
-          meth = call_symbol == INSTANCE_METHOD_SHARP ? klass.instance_method(frame_env) : klass.method(frame_env)
-          meth.source_location
+          # meth = call_symbol == INSTANCE_METHOD_SHARP ? klass.instance_method(frame_env) : klass.method(frame_env)
+          # meth.source_location
+          EMPTY_SRC_LOC
         else
           _binding.source_location
         end

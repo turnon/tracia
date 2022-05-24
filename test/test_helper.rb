@@ -17,7 +17,7 @@ class Tracia
 
     def call(root)
       @sio.puts root.tree_graph
-      write_tree_html(root)
+      write_tree_html(root) unless ENV['NO_TREE_HTML'] == '1'
     end
 
     def read
