@@ -90,12 +90,32 @@ class Tracia
 
     root = @stack[0]
     if root
-      non_tail_recursion!([root]) if @non_tail_recursion
+      eliminate_tail_recursion!([root]) if @non_tail_recursion
       @logger.call(root)
     end
   end
 
   private
+
+  def eliminate_tail_recursion!(stack)
+    @specific_recursion =
+      case @non_tail_recursion
+      when true
+        -> (_) { true }
+      else
+        target_recursions = Array === @non_tail_recursion ? @non_tail_recursion : [@non_tail_recursion]
+        target_recursions.map!{ |h| Frame.new(h[:klass], h[:call_sym], h[:method_name], nil, nil) }
+        -> (current) do
+          target_recursions.any? do |tr|
+            current.klass == tr.klass &&
+              current.call_sym == tr.call_sym &&
+              current.method_name == tr.method_name
+          end
+        end
+      end
+
+    non_tail_recursion!(stack)
+  end
 
   def non_tail_recursion!(stack)
     current_frame = stack.last
@@ -105,7 +125,9 @@ class Tracia
       next unless Frame === child
       next non_tail_recursion!([child]) if last_idx != idx
 
-      recursion_idx = stack.index{ |frame| frame.same_klass_and_method?(child) }
+      # pp (stack + [child]).map{|f| "#{f.send(:class_and_method)}:#{f.object_id}" }
+
+      recursion_idx = @specific_recursion[child] && stack.rindex{ |frame| frame.same_klass_and_method?(child) }
       if recursion_idx
         parent = stack[recursion_idx - 1]
         parent.children << child
