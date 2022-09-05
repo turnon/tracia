@@ -53,16 +53,17 @@ class Tracia
     @backtraces = []
     @level = 0
 
-    if opt[:trace_point] == false
-      @trace_point = FakeTracePoint.new
-    else
-      enable_trace_point
-    end
+    enable_trace_point(opt[:trace_point])
   end
 
-  def enable_trace_point
+  def enable_trace_point(trace_point_opt)
+    return @trace_point = FakeTracePoint.new if trace_point_opt == false
+
     current_thread = Thread.current
     @trace_point = TracePoint.new(:raise) do |point|
+      if Proc === trace_point_opt
+        next if trace_point_opt.call(point) == false
+      end
       bd = point.binding
       next unless current_thread == bd.eval('Thread.current')
       backtrace = bd.eval("binding.partial_callers(-#{depth})")
