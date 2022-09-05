@@ -4,6 +4,7 @@ require "tracia/version"
 require "tracia/gem_paths"
 require "tracia/frame"
 require "tracia/default_logger"
+require "tracia/fake_trace_point"
 
 require "binding_of_callers"
 
@@ -52,7 +53,11 @@ class Tracia
     @backtraces = []
     @level = 0
 
-    enable_trace_point
+    if opt[:trace_point] == false
+      @trace_point = FakeTracePoint.new
+    else
+      enable_trace_point
+    end
   end
 
   def enable_trace_point
