@@ -62,7 +62,7 @@ class Tracia
     current_thread = Thread.current
     @trace_point = TracePoint.new(:raise) do |point|
       if Proc === trace_point_opt
-        next if trace_point_opt.call(point, trc) == false
+        next if trace_point_opt.call(point, self) == false
       end
       bd = point.binding
       next unless current_thread == bd.eval('Thread.current')
