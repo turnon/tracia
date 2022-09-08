@@ -170,6 +170,8 @@ class Tracia
     @frames_to_reject.any?{ |rj| rj =~ raw_frame.file }
   end
 
+  FAKE_METHOD = Struct.new(:source_location).new([nil, 0])
+
   def convert_to_frames(callers)
     callers.map! do |c|
       _binding = c._binding
@@ -179,7 +181,12 @@ class Tracia
 
       source_location =
         if _binding.frame_type == :method
-          meth = call_symbol == INSTANCE_METHOD_SHARP ? klass.instance_method(frame_env) : klass.method(frame_env)
+          meth =
+            if call_symbol == INSTANCE_METHOD_SHARP
+              klass.instance_methods.include?(frame_env.to_sym) ? klass.instance_method(frame_env) : FAKE_METHOD
+            else
+              klass.methods.include?(frame_env.to_sym) ? klass.method(frame_env) : FAKE_METHOD
+            end
           meth.source_location
         else
           _binding.source_location
