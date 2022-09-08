@@ -28,26 +28,26 @@ class TestBlockRecursion < Minitest::Test
   end
 
   EXPECTED = <<EOS
-TestBlockRecursion#block in test_tail_recursion #{__dir__}/test_block_recursion.rb:62
+TestBlockRecursion#block in test_tail_recursion #{__dir__}/test_block_recursion.rb:61
 ├─TestBlockRecursion::BlockRecursion#fly #{__dir__}/test_block_recursion.rb:17
 │ └─{:msg=>"parallel call"}
 └─TestBlockRecursion::BlockRecursion#run #{__dir__}/test_block_recursion.rb:7
-  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:9
+  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:8
   │ └─TestBlockRecursion::BlockRecursion#walk #{__dir__}/test_block_recursion.rb:21
   │   └─walking 5
-  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:9
+  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:8
   │ └─TestBlockRecursion::BlockRecursion#walk #{__dir__}/test_block_recursion.rb:21
   │   └─walking 4
-  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:9
+  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:8
   │ └─TestBlockRecursion::BlockRecursion#walk #{__dir__}/test_block_recursion.rb:21
   │   └─walking 3
-  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:9
+  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:8
   │ └─TestBlockRecursion::BlockRecursion#walk #{__dir__}/test_block_recursion.rb:21
   │   └─walking 2
-  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:9
+  ├─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:8
   │ └─TestBlockRecursion::BlockRecursion#walk #{__dir__}/test_block_recursion.rb:21
   │   └─walking 1
-  └─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:9
+  └─TestBlockRecursion::BlockRecursion#block in run #{__dir__}/test_block_recursion.rb:8
     ├─TestBlockRecursion::BlockRecursion#walk #{__dir__}/test_block_recursion.rb:21
     │ └─walking 0
     └─divided by 0

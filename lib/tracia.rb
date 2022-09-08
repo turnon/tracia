@@ -175,24 +175,12 @@ class Tracia
   def convert_to_frames(callers)
     callers.map! do |c|
       _binding = c._binding
+      iseq = _binding.instance_variable_get(:@iseq)
       klass = c.klass
       call_symbol = c.call_symbol
       frame_env = c.frame_env
 
-      source_location =
-        if _binding.frame_type == :method
-          meth =
-            if call_symbol == INSTANCE_METHOD_SHARP
-              klass.instance_methods.include?(frame_env.to_sym) ? klass.instance_method(frame_env) : FAKE_METHOD
-            else
-              klass.methods.include?(frame_env.to_sym) ? klass.method(frame_env) : FAKE_METHOD
-            end
-          meth.source_location
-        else
-          _binding.source_location
-        end
-
-      Frame.new(klass, call_symbol, frame_env, source_location[0], source_location[1])
+      Frame.new(klass, call_symbol, frame_env, iseq.path, iseq.first_lineno)
     end
 
     callers

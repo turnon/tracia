@@ -111,7 +111,7 @@ class TestNormal < Minitest::Test
   end
 
   EXPECTED = <<EOS
-TestNormal#block in test_normal #{__dir__}/test_normal.rb:172
+TestNormal#block in test_normal #{__dir__}/test_normal.rb:171
 ├─TestNormal::Something#fly #{__dir__}/test_normal.rb:20
 │ └─{:msg=>"parallel call"}
 └─TestNormal::Something#run #{__dir__}/test_normal.rb:9
@@ -137,18 +137,18 @@ TestNormal#block in test_normal #{__dir__}/test_normal.rb:172
   │         └─TestNormal::Something#recursive_call #{__dir__}/test_normal.rb:46
   │           └─{:msg=>"recursive_call 0"}
   ├─TestNormal::Something#loop_call #{__dir__}/test_normal.rb:54
-  │ └─TestNormal::Something#block in loop_call #{__dir__}/test_normal.rb:56
+  │ └─TestNormal::Something#block in loop_call #{__dir__}/test_normal.rb:55
   │   └─TestNormal::Something#loop_call_lv1 #{__dir__}/test_normal.rb:60
   │     └─TestNormal::Something#loop_call_lv2 #{__dir__}/test_normal.rb:64
   │       ├─{:msg=>"loop_call"}
   │       ├─{:msg=>"loop_call"}
   │       └─{:msg=>"loop_call"}
   ├─TestNormal::Something#call_dynamic_methods #{__dir__}/test_normal.rb:68
-  │ └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
-  │   └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
-  │     └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
-  │       └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
-  │         └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:74
+  │ └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:73
+  │   └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:73
+  │     └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:73
+  │       └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:73
+  │         └─TestNormal::Something#block (2 levels) in <class:Something> #{__dir__}/test_normal.rb:73
   │           └─TestNormal::Something#call_dynamic_method_6 #{__dir__}/test_normal.rb:78
   │             └─{:msg=>"call_dynamic_methods"}
   ├─TestNormal::Something#method_missing #{__dir__}/test_normal.rb:82

@@ -30,7 +30,7 @@ class TestSpecificTailRecursion < Minitest::Test
   end
 
   EXPECTED = <<EOS
-TestSpecificTailRecursion#block in test_specific_tail_recursion #{__dir__}/test_specific_tail_recursion.rb:71
+TestSpecificTailRecursion#block in test_specific_tail_recursion #{__dir__}/test_specific_tail_recursion.rb:70
 ├─TestSpecificTailRecursion::SomeRecursion#fly #{__dir__}/test_specific_tail_recursion.rb:14
 │ └─{:msg=>\"parallel call\"}
 └─TestSpecificTailRecursion::SomeRecursion#run #{__dir__}/test_specific_tail_recursion.rb:7
